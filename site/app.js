@@ -253,3 +253,160 @@ $('consult').addEventListener('submit', event => {
   const message=`Halo BITER Services Solution, saya ${String(data.get('name')).trim()}.\nPerangkat: ${data.get('device')}\nMerek/model: ${String(data.get('model')).trim() || '-'}\nKendala/pertanyaan: ${String(data.get('issue')).trim()}\nMohon informasi langkah berikutnya. Terima kasih.`;
   window.location.assign(whatsappUrl+'?text='+encodeURIComponent(message));
 });
+
+const partDialog = $('part-dialog');
+document.querySelectorAll('.anatomy-part').forEach(part => {
+  part.addEventListener('click', () => {
+    $('part-name').textContent = part.querySelector('span').textContent;
+    $('part-function').textContent = part.dataset.description;
+    $('part-example').textContent = part.dataset.example;
+    partDialog.querySelector('.part-preview').replaceChildren(part.querySelector('svg').cloneNode(true));
+    partDialog.showModal();
+  });
+});
+
+const deviceLessons = {
+  anatomi: {
+    'Rekam suara': [
+      ['Mikrofon', 'Gelombang suara menggerakkan membran mikrofon. Suaramu berubah menjadi sinyal.'],
+      ['Papan utama', 'Sistem mengolah data audio dan menyimpan rekaman.'],
+      ['Speaker', 'Saat diputar kembali, speaker mengubah sinyal audio menjadi suara.']
+    ],
+    'Ketik pesan': [
+      ['Layar sentuh', 'Saat jari mengetuk keyboard di layar, sensor membaca posisi sentuhan.'],
+      ['Papan utama', 'Sistem mengenali huruf dan mengirim perintah umpan balik jika getar sentuh aktif.'],
+      ['Motor getar', 'Denyut singkat terasa di jarimu sebagai tanda ketukan diterima.']
+    ],
+    'Ambil foto': [
+      ['Kamera', 'Cahaya masuk melalui lensa. Sensor mengubahnya menjadi data gambar.'],
+      ['Papan utama', 'Prosesor gambar mengolah warna dan kecerahan dari data sensor.'],
+      ['Layar sentuh', 'Layar menampilkan hasil foto. Kamu bisa mencubit layar untuk melihat detailnya.']
+    ],
+    'Putar musik': [
+      ['Layar sentuh', 'Sensor sentuh membaca ketukanmu pada tombol putar.'],
+      ['Papan utama', 'Prosesor mengolah berkas audio. Rangkaian audio menyiapkan sinyal untuk speaker.'],
+      ['Speaker', 'Membran speaker bergetar mengikuti sinyal, lalu terdengarlah musik.']
+    ],
+    'Isi daya': [
+      ['Port USB-C', 'Saat kabel terpasang, daya dari adaptor masuk melalui port USB-C.'],
+      ['Papan utama', 'Rangkaian pengisian mengatur tegangan dan arus ke baterai.'],
+      ['Baterai', 'Baterai menyimpan energi agar HP bisa dipakai lagi setelah kabel dicabut.']
+    ]
+  },
+  'anatomi-laptop': {
+    'Ketik dokumen': [
+      ['Keyboard', 'Ketukan pada tombol menghasilkan kode yang menandai tombol tersebut.'],
+      ['Prosesor', 'Sistem dan aplikasi menerjemahkan ketukan itu menjadi karakter dalam dokumen.'],
+      ['Layar', 'Karakter yang baru kamu ketik muncul di posisi kursor.']
+    ],
+    'Lihat foto': [
+      ['SSD', 'Aplikasi galeri membaca berkas foto dari penyimpanan.'],
+      ['RAM', 'Data gambar tersedia di memori untuk diproses dan ditampilkan.'],
+      ['Layar', 'Piksel pada panel menampilkan warna dan detail fotomu.']
+    ],
+    'Buka aplikasi': [
+      ['SSD', 'Sistem membaca berkas aplikasi dari penyimpanan.'],
+      ['RAM', 'Kode dan data yang sedang dibutuhkan dimuat ke memori kerja.'],
+      ['Prosesor', 'CPU menjalankan instruksi aplikasi sehingga kamu bisa mulai menggunakannya.']
+    ],
+    'Simpan unduhan': [
+      ['Wi-Fi', 'Modul Wi-Fi menerima paket data dari router.'],
+      ['RAM', 'Data ditampung sementara selama proses unduh berlangsung.'],
+      ['SSD', 'Sistem menulis berkas ke penyimpanan agar bisa dibuka lagi setelah laptop dimatikan.']
+    ],
+    'Main gim': [
+      ['Baterai', 'Saat adaptor dilepas, baterai memasok daya untuk menjalankan gim.'],
+      ['Prosesor', 'CPU menghitung logika permainan, termasuk gerakan karakter dan respons terhadap tombol.'],
+      ['Kipas', 'Jika suhu naik, kipas membantu membuang panas melalui sirip pendingin.']
+    ]
+  }
+};
+
+for (const [id, lessons] of Object.entries(deviceLessons)) {
+  const section = document.getElementById(id);
+  const model = section.querySelector('.anatomy-model, .notebook-case');
+  const parts = new Map([...model.querySelectorAll('.anatomy-part')].map(part =>
+    [part.querySelector('span').textContent, part]));
+  const controls = section.querySelector('.lab-controls');
+  const reader = section.querySelector('.lab-reader');
+  const playback = reader.querySelector('.lab-playback');
+  const meter = reader.querySelector('.lab-meter');
+  const choices = controls.querySelector('.lab-choices');
+  const ns = 'http://www.w3.org/2000/svg';
+  const overlay = document.createElementNS(ns, 'svg');
+  overlay.classList.add('lab-trace');
+  overlay.setAttribute('aria-hidden', 'true');
+  const path = document.createElementNS(ns, 'polyline');
+  overlay.append(path);
+  model.append(overlay);
+  let selected = '';
+  let step = 0;
+  let paused = false;
+  let finished = false;
+  let timer;
+
+  function schedule() {
+    clearTimeout(timer);
+    if (!selected || paused || finished || document.hidden || partDialog.open) return;
+    const delay = Math.max(3500, lessons[selected][step][1].length * 65);
+    timer = setTimeout(() => {
+      if (step + 1 === lessons[selected].length) finished = true;
+      else step++;
+      render();
+    }, delay);
+  }
+  document.addEventListener('visibilitychange', schedule);
+  model.addEventListener('click', schedule);
+  partDialog.addEventListener('close', schedule);
+
+  function drawPath() {
+    const points = (lessons[selected] || []).slice(0, step + 1).map(([name]) => {
+      const rect = parts.get(name).getBoundingClientRect();
+      const origin = overlay.getBoundingClientRect();
+      return [rect.left - origin.left + rect.width / 2, rect.top - origin.top + rect.height / 2].join(',');
+    });
+    path.setAttribute('points', points.join(' '));
+  }
+
+  function render() {
+    const steps = lessons[selected];
+    reader.hidden = !steps;
+    for (const button of choices.children) button.setAttribute('aria-pressed', String(button.textContent === selected));
+    for (const [name, part] of parts) part.classList.toggle('lab-active', name === steps?.[step][0]);
+    if (steps) {
+      const [name, description] = steps[step];
+      reader.querySelector('.lab-caption').textContent = (step + 1) + '/' + steps.length + ' · ' + name + ' — ' + description;
+      meter.replaceChildren(...steps.map((_, i) => {
+        const segment = document.createElement('span');
+        segment.classList.toggle('reached', i <= step);
+        return segment;
+      }));
+      playback.textContent = finished ? 'Putar ulang' : paused ? 'Teruskan' : 'Jeda';
+    }
+    drawPath();
+    schedule();
+  }
+
+  for (const label of Object.keys(lessons)) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.addEventListener('click', () => {
+      selected = label;
+      step = 0;
+      paused = finished = false;
+      render();
+    });
+    choices.append(button);
+  }
+  playback.addEventListener('click', () => {
+    if (finished) {
+      step = 0;
+      paused = finished = false;
+    } else paused = !paused;
+    render();
+  });
+  new ResizeObserver(drawPath).observe(model);
+  controls.hidden = false;
+  render();
+}
