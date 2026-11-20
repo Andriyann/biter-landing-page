@@ -1,6 +1,5 @@
 ﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="270 90 2790 1390">
-  <rect x="270" y="90" width="2790" height="1390" rx="70" fill="#fff"/>
-  <path fill="#05bff2" d="M484 124h2264q-26 95 91 80-35 105 89 75 13 83 97 77v544a180 180 0 0 1-180 180H549q28-144-106-122 42-157-88-141 46-123-51-119V304a180 180 0 0 1 180-180Z"/>
+  <path fill="#00b9ec" d="M484 124h2264q-26 95 91 80-35 105 89 75 13 83 97 77v544a180 180 0 0 1-180 180H549q28-144-106-122 42-157-88-141 46-123-51-119V304a180 180 0 0 1 180-180Z"/>
   <g fill="#000">
     <path fill-rule="evenodd" d="M477 309h439v36h35v35h36v143h-36v35h-35v35h71v36h36v154h-36v35h-36v36H477v-96h36V416h-36Zm155 95v106h201v-36h35v-35h-35v-35Zm0 249v105h201v-35h35v-35h-35v-35Z"/>
     <path d="M1388 309h447v178h-92v-86h-79v364h46v91h-194v-91h43V401h-80v86h-91Zm553-5h334v108h-220v109h107v112h-112v113h225v108h-334Z"/>
@@ -10,5 +9,5 @@
     <path fill="#cbd5d9" d="M1217 216h33l30 90q4 11-6 20l-15 17v214h-51V343l-15-17q-10-9-6-20Z"/>
     <path fill="#f94035" d="M1183 556h102q19 0 17 22-1 22-11 46-9 20 2 43 9 21 9 40v177q0 63-68 63t-68-63V707q0-19 9-40 11-23 2-43-10-24-12-46-2-22 18-22Z"/>
   </g>
-  <text x="1665" y="1446" text-anchor="middle" font-family="monospace" font-size="187" textLength="2020" lengthAdjust="spacingAndGlyphs">SERVICES SOLUTION</text>
+  <text x="1665" y="1446" fill="#000" text-anchor="middle" font-family="monospace" font-size="187" textLength="2020" lengthAdjust="spacingAndGlyphs">SERVICES SOLUTION</text>
 </svg>

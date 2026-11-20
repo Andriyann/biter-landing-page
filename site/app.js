@@ -31,13 +31,49 @@ const sectionObserver = new IntersectionObserver(entries => {
 }, { rootMargin: '-15% 0px -45% 0px' });
 for (const link of sectionLinks) sectionObserver.observe($(link.hash.slice(1)));
 $('address').textContent = config.address;
+
+const workshopClock = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Jakarta', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+});
+let hoursTimer;
+function updateStoreHours() {
+  const now = new Date();
+  const clock = Object.fromEntries(workshopClock.formatToParts(now).map(part => [part.type, part.value]));
+  const today = $('store-hours').querySelector(`tr[data-day="${clock.weekday}"]`);
+  const [start, end] = today.querySelectorAll('time');
+  const time = clock.hour + ':' + clock.minute;
+  const open = time >= start.dateTime && time < end.dateTime;
+  const status = $('hours-status');
+  status.hidden = false;
+  status.dataset.state = open ? 'open' : 'closed';
+  status.textContent = translate(open ? 'Buka' : 'Tutup');
+  const day = today.cells[0].textContent;
+  const range = today.cells[1].textContent;
+  $('hours-day').textContent = translate(day) + ' · ' + translate('Hari ini');
+  $('hours-range').textContent = range;
+  $('visit-hours').textContent = translate(day) + ' · ' + range + ' WIB';
+  for (const row of today.parentElement.rows) {
+    if (row === today) row.setAttribute('aria-current', 'date');
+    else row.removeAttribute('aria-current');
+  }
+  clearTimeout(hoursTimer);
+  hoursTimer = setTimeout(updateStoreHours, 60000 - (now.getTime() % 60000));
+}
+updateStoreHours();
+document.addEventListener('biter-language', updateStoreHours);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) updateStoreHours(); });
+
 const whatsappNumber = String(config.whatsapp || '').replace(/\D/g, '');
 const whatsappUrl = /^[1-9]\d{7,14}$/.test(whatsappNumber)
   ? 'https://wa.me/' + whatsappNumber
   : '';
 if (whatsappUrl) {
   const launcher = $('whatsapp-launcher');
-  launcher.href = whatsappUrl + '?text=' + encodeURIComponent('Halo BITER, saya ingin konsultasi servis perangkat.');
+  const updateLauncher = () => {
+    launcher.href = whatsappUrl + '?text=' + encodeURIComponent(translate('Halo BITER, saya ingin konsultasi servis perangkat.'));
+  };
+  updateLauncher();
+  document.addEventListener('biter-language', updateLauncher);
   launcher.target = '_blank';
   launcher.rel = 'noopener noreferrer';
   $('footer-whatsapp').href = whatsappUrl;
@@ -109,6 +145,13 @@ const testimonials = (config.testimonials || []).map(({ name, photo, text }) => 
 const reviewerName = review => review.authorAttribution?.displayName?.trim().toLocaleLowerCase('id');
 const featuredNames = new Set(testimonials.map(reviewerName));
 
+let reviewStatusText = () => '';
+function setReviewStatus(getText) {
+  reviewStatusText = getText;
+  $('review-status').textContent = getText();
+}
+document.addEventListener('biter-language', () => { $('review-status').textContent = reviewStatusText(); });
+
 function showReviews(place) {
   const googleReviews = (place?.reviews || [])
     .filter(review => !featuredNames.has(reviewerName(review)));
@@ -117,7 +160,7 @@ function showReviews(place) {
     card.className = 'quote';
     const author = review.authorAttribution;
     const name = document.createElement(author?.uri ? 'a' : 'strong');
-    name.textContent = author?.displayName || 'Pengguna Google Maps';
+    name.textContent = author?.displayName || translate('Pengguna Google Maps');
     if (author?.uri) {
       name.href = author.uri;
       name.target = '_blank';
@@ -127,7 +170,7 @@ function showReviews(place) {
     if (review.rating) {
       const rating = document.createElement('p');
       rating.className = 'review-rating';
-      rating.setAttribute('aria-label', review.rating + ' dari 5 bintang');
+      rating.setAttribute('aria-label', review.rating + '/5');
       const stars = document.createElement('span');
       stars.setAttribute('aria-hidden', 'true');
       const filled = Math.min(5, Math.max(0, Math.round(review.rating)));
@@ -138,6 +181,7 @@ function showReviews(place) {
     if (review.text) {
       const quote = document.createElement('blockquote');
       quote.textContent = review.text;
+      quote.lang = review.textLanguageCode || 'id';
       card.append(quote);
     }
     const byline = document.createElement('div');
@@ -173,9 +217,9 @@ function showReviews(place) {
   reviewTrack.scrollLeft = previousOffset;
   updateReviewControls();
   scheduleReviewAdvance();
-  $('review-status').textContent = place?.rating
-    ? 'Google Maps · ' + place.rating + '/5 (' + place.userRatingCount + ' penilaian). Ulasan tambahan diurutkan berdasarkan relevansi.'
-    : 'Pengalaman pelanggan yang pernah servis di BITER.';
+  setReviewStatus(() => place?.rating
+    ? 'Google Maps · ' + place.rating + '/5 (' + place.userRatingCount + (document.documentElement.lang === 'en' ? ' ratings). Additional reviews are sorted by relevance.' : ' penilaian). Ulasan tambahan diurutkan berdasarkan relevansi.')
+    : translate('Pengalaman pelanggan yang pernah servis di BITER.'));
   const attributions = $('review-attributions');
   attributions.replaceChildren();
   for (const { provider, providerURI } of place?.attributions || []) {
@@ -197,7 +241,7 @@ function loadGoogleMaps() {
     const script = document.createElement('script');
     const params = new URLSearchParams({
       key: config.googleMapsApiKey, loading: 'async', callback: 'biterMapsReady',
-      v: 'weekly', language: 'id', region: 'ID'
+      v: 'weekly', language: document.documentElement.lang, region: 'ID'
     });
     window.biterMapsReady = resolve;
     window.gm_authFailure = () => reject(new Error('Google Maps authentication failed'));
@@ -209,18 +253,17 @@ function loadGoogleMaps() {
 }
 
 async function startReviews() {
-  const status = $('review-status');
-  status.textContent = 'Memuat ulasan Google Maps…';
+  setReviewStatus(() => translate('Memuat ulasan Google Maps…'));
   try {
     await loadGoogleMaps();
     const { Place } = await google.maps.importLibrary('places');
     const refresh = async () => {
       try {
-        const place = new Place({ id: config.placeId, requestedLanguage: 'id' });
+        const place = new Place({ id: config.placeId, requestedLanguage: document.documentElement.lang });
         await place.fetchFields({ fields: ['rating', 'userRatingCount', 'reviews'] });
         showReviews(place);
       } catch {
-        status.textContent = 'Ulasan belum bisa diperbarui. Buka Google Maps untuk melihat ulasan terbaru.';
+        setReviewStatus(() => translate('Ulasan belum bisa diperbarui. Buka Google Maps untuk melihat ulasan terbaru.'));
       } finally {
         window.setTimeout(refreshWhenVisible, 5 * 60 * 1000);
       }
@@ -234,7 +277,7 @@ async function startReviews() {
     }
     refreshWhenVisible();
   } catch {
-    status.textContent = 'Ulasan tidak dapat dimuat. Lihat langsung di Google Maps.';
+    setReviewStatus(() => translate('Ulasan tidak dapat dimuat. Lihat langsung di Google Maps.'));
   }
 }
 
@@ -247,19 +290,22 @@ document.querySelectorAll('.service').forEach(button => button.addEventListener(
 $('consult').addEventListener('submit', event => {
   event.preventDefault();
   if (!whatsappUrl) {
-    $('notice').textContent='Nomor WhatsApp BITER belum tersedia. Silakan kunjungi halaman ini kembali setelah informasi kontak diperbarui.'; return;
+    $('notice').textContent = translate('Nomor WhatsApp BITER belum tersedia. Silakan kunjungi halaman ini kembali setelah informasi kontak diperbarui.'); return;
   }
   const data=new FormData(event.currentTarget);
   const message=`Halo BITER Services Solution, saya ${String(data.get('name')).trim()}.\nPerangkat: ${data.get('device')}\nMerek/model: ${String(data.get('model')).trim() || '-'}\nKendala/pertanyaan: ${String(data.get('issue')).trim()}\nMohon informasi langkah berikutnya. Terima kasih.`;
-  window.location.assign(whatsappUrl+'?text='+encodeURIComponent(message));
+  const outgoing = document.documentElement.lang === 'en'
+    ? `Hi BITER, my name is ${String(data.get('name')).trim()}.\nDevice: ${translate(data.get('device'))}\nBrand/model: ${String(data.get('model')).trim() || '-'}\nIssue: ${String(data.get('issue')).trim()}\nWhat would you recommend next? Thank you.`
+    : message;
+  window.location.assign(whatsappUrl+'?text='+encodeURIComponent(outgoing));
 });
 
 const partDialog = $('part-dialog');
 document.querySelectorAll('.anatomy-part').forEach(part => {
   part.addEventListener('click', () => {
     $('part-name').textContent = part.querySelector('span').textContent;
-    $('part-function').textContent = part.dataset.description;
-    $('part-example').textContent = part.dataset.example;
+    $('part-function').textContent = translate(part.dataset.description);
+    $('part-example').textContent = translate(part.dataset.example);
     partDialog.querySelector('.part-preview').replaceChildren(part.querySelector('svg').cloneNode(true));
     partDialog.showModal();
   });
@@ -267,6 +313,11 @@ document.querySelectorAll('.anatomy-part').forEach(part => {
 
 const deviceLessons = {
   anatomi: {
+    'Pindai kode QR': [
+      ['Kamera', 'Sensor kamera menangkap pola kotak pada kode QR.'],
+      ['Papan utama', 'Prosesor membaca pola itu dan menerjemahkannya menjadi data, misalnya alamat situs.'],
+      ['Layar sentuh', 'Hasil pemindaian muncul di layar. Kamu bisa memeriksa alamatnya sebelum membuka tautan.']
+    ],
     'Rekam suara': [
       ['Mikrofon', 'Gelombang suara menggerakkan membran mikrofon. Suaramu berubah menjadi sinyal.'],
       ['Papan utama', 'Sistem mengolah data audio dan menyimpan rekaman.'],
@@ -288,12 +339,17 @@ const deviceLessons = {
       ['Speaker', 'Membran speaker bergetar mengikuti sinyal, lalu terdengarlah musik.']
     ],
     'Isi daya': [
-      ['Port USB-C', 'Saat kabel terpasang, daya dari adaptor masuk melalui port USB-C.'],
+      ['Port USB-C', 'Saat kabel terpasang, daya dari adaptor masuk melalui port charging.'],
       ['Papan utama', 'Rangkaian pengisian mengatur tegangan dan arus ke baterai.'],
       ['Baterai', 'Baterai menyimpan energi agar HP bisa dipakai lagi setelah kabel dicabut.']
     ]
   },
   'anatomi-laptop': {
+    'Simpan dokumen': [
+      ['Keyboard', 'Saat kamu menekan Ctrl dan S di aplikasi dokumen, keyboard mengirimkan perintah simpan.'],
+      ['RAM', 'Aplikasi mengambil isi dokumen yang sedang kamu edit dari memori kerja.'],
+      ['SSD', 'Sistem menulis perubahan ke berkas sehingga hasil edit tetap ada setelah laptop dimatikan.']
+    ],
     'Ketik dokumen': [
       ['Keyboard', 'Ketukan pada tombol menghasilkan kode yang menandai tombol tersebut.'],
       ['Prosesor', 'Sistem dan aplikasi menerjemahkan ketukan itu menjadi karakter dalam dokumen.'],
@@ -326,7 +382,7 @@ for (const [id, lessons] of Object.entries(deviceLessons)) {
   const section = document.getElementById(id);
   const model = section.querySelector('.anatomy-model, .notebook-case');
   const parts = new Map([...model.querySelectorAll('.anatomy-part')].map(part =>
-    [part.querySelector('span').textContent, part]));
+    [part.dataset.component, part]));
   const controls = section.querySelector('.lab-controls');
   const reader = section.querySelector('.lab-reader');
   const playback = reader.querySelector('.lab-playback');
@@ -371,17 +427,20 @@ for (const [id, lessons] of Object.entries(deviceLessons)) {
   function render() {
     const steps = lessons[selected];
     reader.hidden = !steps;
-    for (const button of choices.children) button.setAttribute('aria-pressed', String(button.textContent === selected));
+    for (const button of choices.children) {
+      button.textContent = translate(button.dataset.lesson);
+      button.setAttribute('aria-pressed', String(button.dataset.lesson === selected));
+    }
     for (const [name, part] of parts) part.classList.toggle('lab-active', name === steps?.[step][0]);
     if (steps) {
       const [name, description] = steps[step];
-      reader.querySelector('.lab-caption').textContent = (step + 1) + '/' + steps.length + ' · ' + name + ' — ' + description;
+      reader.querySelector('.lab-caption').textContent = (step + 1) + '/' + steps.length + ' · ' + parts.get(name).querySelector('span').textContent + ' — ' + translate(description);
       meter.replaceChildren(...steps.map((_, i) => {
         const segment = document.createElement('span');
         segment.classList.toggle('reached', i <= step);
         return segment;
       }));
-      playback.textContent = finished ? 'Putar ulang' : paused ? 'Teruskan' : 'Jeda';
+      playback.textContent = translate(finished ? 'Putar ulang' : paused ? 'Teruskan' : 'Jeda');
     }
     drawPath();
     schedule();
@@ -390,7 +449,7 @@ for (const [id, lessons] of Object.entries(deviceLessons)) {
   for (const label of Object.keys(lessons)) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = label;
+    button.dataset.lesson = label;
     button.addEventListener('click', () => {
       selected = label;
       step = 0;
@@ -406,7 +465,25 @@ for (const [id, lessons] of Object.entries(deviceLessons)) {
     } else paused = !paused;
     render();
   });
+  document.addEventListener('biter-language', render);
   new ResizeObserver(drawPath).observe(model);
   controls.hidden = false;
   render();
+}
+
+const repairTour = document.querySelector('.repair-tour');
+if (repairTour) {
+  const stageButtons = [...repairTour.querySelectorAll('.repair-stages button')];
+  function selectRepairStage(index) {
+    repairTour.dataset.stage = String(index + 1);
+    stageButtons.forEach((button, i) => {
+      const selected = i === index;
+      button.setAttribute('aria-expanded', String(selected));
+      document.getElementById(button.getAttribute('aria-controls')).hidden = !selected;
+    });
+  }
+  stageButtons.forEach((button, i) => button.addEventListener('click', () => selectRepairStage(i)));
+  repairTour.querySelector('.repair-scene').addEventListener('click', () => {
+    selectRepairStage(Number(repairTour.dataset.stage) % stageButtons.length);
+  });
 }

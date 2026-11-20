@@ -9,6 +9,12 @@ try {
 function applyTheme() {
   const dark = selectedTheme === 'dark' || (!selectedTheme && colorPreference.matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  document.querySelectorAll('header .brand img').forEach(logo => {
+    logo.src = dark ? './logo-dark.svg' : './logo.svg';
+  });
+  document.querySelectorAll('.site-footer .brand img').forEach(logo => {
+    logo.src = './logo-dark.svg';
+  });
   document.querySelector('meta[name="theme-color"]').content = dark ? '#111a23' : '#ffffff';
   document.getElementById('theme')?.setAttribute('aria-pressed', String(dark));
 }
