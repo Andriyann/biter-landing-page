@@ -4,6 +4,7 @@
   directionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=BITER+Services+Solution&destination_place_id=ChIJuWX1q0OXaS4RyFhrcVN_GzQ',
   reviewsUrl: 'https://search.google.com/local/reviews?placeid=ChIJuWX1q0OXaS4RyFhrcVN_GzQ',
   placeId: 'ChIJuWX1q0OXaS4RyFhrcVN_GzQ',
+  shopLocation: { latitude: -6.4319015, longitude: 107.0309584 },
   googleMapsApiKey: '', // API key browser dengan pembatasan situs dan API
   testimonials: [
     {

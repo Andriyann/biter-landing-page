@@ -1,6 +1,15 @@
 'use strict';
 
 const englishCopy = {
+  "Dari pengecekan sampai perangkat siap diambil.": "From the first check to pickup.",
+  "Seberapa dekat BITER?": "How far away is BITER?",
+  "Hitung jarak saya": "Check my distance",
+  "Gunakan lokasi perangkat untuk melihat perkiraan jarak garis lurus ke toko.": "Use your device location to estimate the straight-line distance to the shop.",
+  "Perkiraan jarak garis lurus ke BITER": "Estimated straight-line distance to BITER",
+  "Mencari lokasi perangkat…": "Finding your location…",
+  "Izin lokasi belum diberikan. Izinkan lokasi di browser atau buka Google Maps untuk melihat rute.": "Location permission is off. Allow location access in your browser or open Google Maps for directions.",
+  "Lokasi belum terbaca. Coba lagi atau buka Google Maps untuk melihat rute.": "We couldn't find your location. Try again or open Google Maps for directions.",
+  "Lokasi tidak tersedia di browser ini. Buka Google Maps untuk melihat rute.": "Location is unavailable in this browser. Open Google Maps for directions.",
   "Anatomi": "Anatomy",
   "Daftar Servis": "Repair services",
   "Ulasan": "Reviews",

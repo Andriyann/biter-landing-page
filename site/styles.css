@@ -84,6 +84,8 @@ body { background: var(--page); }
 .reviews #review-status { margin: 0; color: #d4e5fc; }
 .review-carousel {
   display: grid;
+  max-width: 830px;
+  margin-inline: auto;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
   gap: clamp(10px, 2vw, 24px);
   align-items: center;
@@ -114,7 +116,7 @@ body { background: var(--page); }
   position: relative;
   grid-template-columns: none;
   grid-auto-flow: column;
-  grid-auto-columns: calc((100% - 20px) / 2);
+  grid-auto-columns: 100%;
   gap: 20px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -122,6 +124,21 @@ body { background: var(--page); }
   padding-bottom: 38px;
 }
 .review-grid::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .review-carousel.in-view .quote.in-view { animation: review-turn .65s cubic-bezier(.2,.8,.22,1); }
+  .review-carousel.in-view .quote.in-view .review-author { animation: author-arrive .7s ease-out; }
+  @keyframes review-turn {
+    from { opacity: .42; transform: perspective(950px) rotateY(var(--turn-angle, -13deg)) translateY(10px) scale(.96); }
+    75% { opacity: 1; }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes author-arrive { 0%, 20% { opacity: .25; } to { opacity: 1; } }
+}
+.distance-card { max-width: 420px; padding: 18px; margin-bottom: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); }
+.distance-card h3 { margin: 0; }
+.distance-art { display: block; width: min(100%, 280px); margin: 8px auto; color: var(--accent); }
+.distance-card p { margin: 0 0 12px; }
+.distance-card button:disabled { opacity: .65; cursor: progress; }
 .review-grid:has(> :only-child) { grid-auto-columns: min(100%, 580px); justify-content: center; }
 .quote {
   position: relative;
@@ -615,6 +632,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--cyan); outl
   width: 66%;
   height: 100%;
   object-fit: cover;
+  object-position: center 48%;
 }
 .workshop-hero::before {
   content: "";
@@ -803,6 +821,11 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
 .repair-tour { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.24fr) minmax(0,1fr); align-items: center; gap: clamp(16px,2.6vw,40px); margin-top: 24px; }
 .repair-scene { width: 100%; padding: 16px; border: 1px solid #36566b; border-radius: 22px; background-color: #133344; background-image: radial-gradient(#345765 1px,transparent 1px); background-size: 16px 16px; }
 .repair-scene svg { display: block; width: 100%; max-height: 330px; }
+.repair-tour { position: relative; }
+.tour-cursor { position: absolute; top: 0; left: 0; width: 24px; height: 30px; z-index: 2; pointer-events: none; filter: drop-shadow(0 2px 2px #102b4233); }
+@media (prefers-reduced-motion: no-preference) {
+  .tour-cursor { transition: transform .64s cubic-bezier(.4,0,.2,1); }
+}
 .stage-art { display: none; }
 [data-stage="1"] .stage-check, [data-stage="2"] .stage-price, [data-stage="3"] .stage-fix, [data-stage="4"] .stage-done { display: inline; }
 [data-stage="4"] .glass-crack { opacity: 0; }

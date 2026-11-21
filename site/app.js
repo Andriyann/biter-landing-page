@@ -32,6 +32,52 @@ const sectionObserver = new IntersectionObserver(entries => {
 for (const link of sectionLinks) sectionObserver.observe($(link.hash.slice(1)));
 $('address').textContent = config.address;
 
+const distanceButton = $('measure-distance');
+let distanceKm = null;
+let distanceMessage = 'Gunakan lokasi perangkat untuk melihat perkiraan jarak garis lurus ke toko.';
+
+function renderDistance() {
+  const result = $('distance-result');
+  if (distanceKm === null) {
+    result.textContent = translate(distanceMessage);
+    return;
+  }
+  const metres = distanceKm < 1;
+  const distance = new Intl.NumberFormat(document.documentElement.lang, {
+    maximumFractionDigits: metres ? 0 : 1
+  }).format(metres ? distanceKm * 1000 : distanceKm);
+  result.textContent = translate('Perkiraan jarak garis lurus ke BITER') + ' · ' + distance + (metres ? ' m' : ' km');
+}
+
+distanceButton.addEventListener('click', () => {
+  distanceKm = null;
+  if (!window.isSecureContext || !navigator.geolocation) {
+    distanceMessage = 'Lokasi tidak tersedia di browser ini. Buka Google Maps untuk melihat rute.';
+    renderDistance();
+    return;
+  }
+  distanceButton.disabled = true;
+  distanceMessage = 'Mencari lokasi perangkat…';
+  renderDistance();
+  navigator.geolocation.getCurrentPosition(({ coords }) => {
+    const shop = config.shopLocation;
+    const radians = Math.PI / 180;
+    const a = Math.sin((shop.latitude - coords.latitude) * radians / 2) ** 2
+      + Math.cos(coords.latitude * radians) * Math.cos(shop.latitude * radians)
+      * Math.sin((shop.longitude - coords.longitude) * radians / 2) ** 2;
+    distanceKm = 12742 * Math.asin(Math.sqrt(Math.min(1, a)));
+    distanceButton.disabled = false;
+    renderDistance();
+  }, error => {
+    distanceMessage = error.code === 1
+      ? 'Izin lokasi belum diberikan. Izinkan lokasi di browser atau buka Google Maps untuk melihat rute.'
+      : 'Lokasi belum terbaca. Coba lagi atau buka Google Maps untuk melihat rute.';
+    distanceButton.disabled = false;
+    renderDistance();
+  }, { maximumAge: 60000, timeout: 12000 });
+});
+document.addEventListener('biter-language', renderDistance);
+
 const workshopClock = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Asia/Jakarta', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
 });
@@ -92,6 +138,49 @@ const carousel = $('review-carousel');
 const previousReview = $('review-prev');
 const nextReview = $('review-next');
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+const serviceVideos = [...document.querySelectorAll('#layanan .service-photo')];
+const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+let activeServiceVideo = null;
+
+function stopServiceVideo() {
+  if (!activeServiceVideo) return;
+  activeServiceVideo.pause();
+  activeServiceVideo.load(); // Restore the poster when the visitor moves on.
+  activeServiceVideo = null;
+}
+function previewService(video) {
+  if (motionPreference.matches || document.hidden || activeServiceVideo === video) return;
+  stopServiceVideo();
+  activeServiceVideo = video;
+  video.play().catch(() => {
+    if (activeServiceVideo === video && video.paused) stopServiceVideo();
+  });
+}
+const serviceObserver = new IntersectionObserver(entries => {
+  if (hoverPointer.matches) return;
+  for (const entry of entries) {
+    if (!entry.isIntersecting && entry.target === activeServiceVideo) stopServiceVideo();
+  }
+  const entering = entries.find(entry => entry.isIntersecting);
+  if (entering) previewService(entering.target);
+}, { rootMargin: '-42% 0px -42% 0px' });
+for (const video of serviceVideos) {
+  const card = video.closest('article');
+  serviceObserver.observe(video);
+  card.addEventListener('pointerenter', () => { if (hoverPointer.matches) previewService(video); });
+  card.addEventListener('pointerleave', () => {
+    if (hoverPointer.matches && activeServiceVideo === video && !card.matches(':focus-within')) stopServiceVideo();
+  });
+  card.addEventListener('focusin', () => previewService(video));
+  card.addEventListener('focusout', () => { if (activeServiceVideo === video) stopServiceVideo(); });
+}
+motionPreference.addEventListener('change', () => { if (motionPreference.matches) stopServiceVideo(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopServiceVideo(); });
+const reviewCardObserver = new IntersectionObserver(entries => {
+  for (const entry of entries) {
+    entry.target.classList.toggle('in-view', entry.intersectionRatio >= .6);
+  }
+}, { root: reviewTrack, threshold: .6 });
 let carouselVisible = false;
 let reviewTimer;
 
@@ -115,6 +204,7 @@ function scheduleReviewAdvance() {
 motionPreference.addEventListener('change', scheduleReviewAdvance);
 const reviewObserver = new IntersectionObserver(([entry]) => {
   carouselVisible = entry.isIntersecting;
+  carousel.classList.toggle('in-view', carouselVisible);
   scheduleReviewAdvance();
 });
 reviewObserver.observe(carousel);
@@ -132,7 +222,12 @@ function moveReviews(direction) {
 
 previousReview.addEventListener('click', () => moveReviews(-1));
 nextReview.addEventListener('click', () => moveReviews(1));
-reviewTrack.addEventListener('scroll', updateReviewControls, { passive: true });
+let previousReviewScroll = 0;
+reviewTrack.addEventListener('scroll', () => {
+  reviewTrack.style.setProperty('--turn-angle', reviewTrack.scrollLeft >= previousReviewScroll ? '-13deg' : '13deg');
+  previousReviewScroll = reviewTrack.scrollLeft;
+  updateReviewControls();
+}, { passive: true });
 window.addEventListener('resize', () => {
   updateReviewControls();
   scheduleReviewAdvance();
@@ -212,7 +307,9 @@ function showReviews(place) {
   });
 
   const previousOffset = reviewTrack.scrollLeft;
+  reviewCardObserver.disconnect();
   reviewTrack.replaceChildren(...cards);
+  cards.forEach(card => reviewCardObserver.observe(card));
   carousel.hidden = !cards.length;
   reviewTrack.scrollLeft = previousOffset;
   updateReviewControls();
@@ -482,8 +579,46 @@ if (repairTour) {
       document.getElementById(button.getAttribute('aria-controls')).hidden = !selected;
     });
   }
-  stageButtons.forEach((button, i) => button.addEventListener('click', () => selectRepairStage(i)));
-  repairTour.querySelector('.repair-scene').addEventListener('click', () => {
-    selectRepairStage(Number(repairTour.dataset.stage) % stageButtons.length);
-  });
+  const cursor = repairTour.querySelector('.tour-cursor');
+  let visible = false;
+  let timer;
+  let target = 0;
+
+  function positionCursor() {
+    if (cursor.hidden) return;
+    const rect = stageButtons[target].getBoundingClientRect();
+    const tour = repairTour.getBoundingClientRect();
+    cursor.style.transform = `translate(${rect.right - tour.left - 32}px, ${rect.top - tour.top + rect.height / 2 + 4}px)`;
+  }
+  function syncTour() {
+    clearTimeout(timer);
+    const running = visible && !document.hidden && !motionPreference.matches;
+    cursor.hidden = !running;
+    if (!running) return;
+    target = Number(repairTour.dataset.stage) - 1;
+    positionCursor();
+    timer = setTimeout(() => {
+      target = (target + 1) % stageButtons.length;
+      positionCursor();
+      timer = setTimeout(() => {
+        selectRepairStage(target);
+        syncTour();
+      }, 650);
+    }, 5000);
+  }
+  function selectManually(index) {
+    selectRepairStage(index);
+    syncTour();
+  }
+  stageButtons.forEach((button, i) => button.addEventListener('click', () => selectManually(i)));
+  repairTour.querySelector('.repair-scene').addEventListener('click', () => selectManually(Number(repairTour.dataset.stage) % stageButtons.length));
+  new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    syncTour();
+  }, { threshold: .2 }).observe(repairTour);
+  new ResizeObserver(positionCursor).observe(repairTour);
+  document.addEventListener('visibilitychange', syncTour);
+  document.addEventListener('biter-language', syncTour);
+  motionPreference.addEventListener('change', syncTour);
+  syncTour();
 }
