@@ -2,10 +2,11 @@
 
 const englishCopy = {
   "Dari pengecekan sampai perangkat siap diambil.": "From the first check to pickup.",
-  "Seberapa dekat BITER?": "How far away is BITER?",
+  "Seberapa dekat BITER dengan kamu?": "How far are you from BITER?",
+  "Lokasi kamu": "Your location",
   "Hitung jarak saya": "Check my distance",
-  "Gunakan lokasi perangkat untuk melihat perkiraan jarak garis lurus ke toko.": "Use your device location to estimate the straight-line distance to the shop.",
-  "Perkiraan jarak garis lurus ke BITER": "Estimated straight-line distance to BITER",
+  "Gunakan lokasi perangkat kamu untuk melihat perkiraan jarak kamu ke toko.": "Use your device location to estimate your distance to the shop.",
+  "perkiraan jarak dari lokasi kamu ke BITER": "Estimated distance from your location to BITER",
   "Mencari lokasi perangkat…": "Finding your location…",
   "Izin lokasi belum diberikan. Izinkan lokasi di browser atau buka Google Maps untuk melihat rute.": "Location permission is off. Allow location access in your browser or open Google Maps for directions.",
   "Lokasi belum terbaca. Coba lagi atau buka Google Maps untuk melihat rute.": "We couldn't find your location. Try again or open Google Maps for directions.",

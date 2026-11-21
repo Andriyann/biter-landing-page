@@ -60,6 +60,37 @@ Terima kasih Bitter Service Solusion, sudah memperbaiki dengan ketelitian dan me
       name: 'Rizki Maulana Rachman',
       photo: './photo/Rizky.png',
       text: 'Rela kirim jauh dari Bandung karena terpercaya. Tempat servis HP yang paling OK, detil, tidak terburu-buru dan memastikan detil penyebab kerusakan HPnya, yang jelas memang ditangani oleh yang ahli di bidangnya. Mantap pokoknya. Jangan ragu perbaiki hp kamu di sini.'
+    },
+    {
+      name: 'Citra Arisuta',
+      photo: './photo/Citra%20Arisuta.png',
+      text: 'Iphone 13ku blank, panik bgt hape kerja satu2nya. Untung kakanya gercep bgt ga sampai 5 menit nyala lagi😭 makasi yaa'
+    },
+    {
+      name: 'Alif Abiansyah',
+      photo: './photo/Alif%20Abiansyah.png',
+      text: 'Alhamdulillah pengerjaan selalu cepat dan amanah. Selalu sukses buat BITER Team semua'
+    },
+    {
+      name: 'Rian Fermana',
+      photo: './photo/Rian%20Fermana.png',
+      text: 'Servis di sini puas banget! Kerjanya cepat, rapi, dan komunikatif. Teknisi juga jelasin masalahnya dengan jelas. Pengerjaan aman dan terpercaya. Pasti bakal balik lagi kalau ada masalah.'
+    },
+    {
+      name: 'Taufik Jaka Permana',
+      photo: './photo/Taufik%20Jaka%20Permana.png',
+      text: 'Saya baru saja service HP d sini..sangat sangat reccomended sekali.. hasil sangat memuaskan.. sangat profesional.. ramah dan komunikatif... semoga awet HP ku.. dan sukses buat BITER SS..'
+    },
+    {
+      name: 'Animni Fiddaroini',
+      photo: './photo/Animni.png',
+      text: 'Ganti keyboard laptop? bisaaaa. Rekomend banget buat service laptop/hp, udah langganan kesini, pokoknya jangan ragu jangan bimbang 🙌'
+    },
+    {
+      name: 'Widya Wardhani',
+      photo: './photo/Widya.png',
+      text: `before & after.
+awalnya udah hopeless gak bisa dibenerin karena separah itu rusak nya dan bengkok, tapi coba konsul ke Mas Ian dan mau dicoba dulu, ternyata alhamdulillah bisa. HP udah 4thn jadi banyak memori foto dan untuk kerjaan juga, sekarang udah bisa normal lagi dan dataaa amann gak ada yang ke hapus. kerusakan diinfokan dulu baru dikerjain, thankyou Mas Ian, gercep trusted deh pokoknyaaa🙂‍↔️🙏🏻💫🔥`
     }
   ]
 };

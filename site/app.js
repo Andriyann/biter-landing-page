@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 const config = window.BITER_CONFIG || {};
 const $ = id => document.getElementById(id);
 $('year').textContent = new Date().getFullYear();
@@ -34,10 +34,11 @@ $('address').textContent = config.address;
 
 const distanceButton = $('measure-distance');
 let distanceKm = null;
-let distanceMessage = 'Gunakan lokasi perangkat untuk melihat perkiraan jarak garis lurus ke toko.';
+let distanceMessage = 'Gunakan lokasi perangkat kamu untuk melihat perkiraan jarak kamu ke toko.';
 
 function renderDistance() {
   const result = $('distance-result');
+  result.closest('.distance-card').classList.toggle('distance-ready', distanceKm !== null);
   if (distanceKm === null) {
     result.textContent = translate(distanceMessage);
     return;
@@ -46,7 +47,9 @@ function renderDistance() {
   const distance = new Intl.NumberFormat(document.documentElement.lang, {
     maximumFractionDigits: metres ? 0 : 1
   }).format(metres ? distanceKm * 1000 : distanceKm);
-  result.textContent = translate('Perkiraan jarak garis lurus ke BITER') + ' · ' + distance + (metres ? ' m' : ' km');
+  const reading = document.createElement('strong');
+  reading.textContent = distance + (metres ? ' m' : ' km');
+  result.replaceChildren(reading, document.createTextNode(translate('perkiraan jarak dari lokasi kamu ke BITER')));
 }
 
 distanceButton.addEventListener('click', () => {

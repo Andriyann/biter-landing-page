@@ -137,6 +137,17 @@ body { background: var(--page); }
 .distance-card { max-width: 420px; padding: 18px; margin-bottom: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); }
 .distance-card h3 { margin: 0; }
 .distance-art { display: block; width: min(100%, 280px); margin: 8px auto; color: var(--accent); }
+.distance-line, .distance-dot { visibility: hidden; }
+.distance-ready .distance-line, .distance-ready .distance-dot { visibility: visible; }
+.distance-ready .distance-dot { transform: translateX(208px); }
+.distance-ready #distance-result { text-align: center; }
+#distance-result strong { display: block; color: var(--action-ink); font-size: clamp(1.8rem, 4vw, 2.4rem); line-height: 1.2; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) {
+  .distance-ready .distance-line { stroke-dasharray: 1; animation: measure-line 1.3s ease-in-out; }
+  .distance-ready .distance-dot { animation: measure-dot 1.3s ease-in-out; }
+  @keyframes measure-line { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes measure-dot { from { transform: translateX(0); } to { transform: translateX(208px); } }
+}
 .distance-card p { margin: 0 0 12px; }
 .distance-card button:disabled { opacity: .65; cursor: progress; }
 .review-grid:has(> :only-child) { grid-auto-columns: min(100%, 580px); justify-content: center; }
@@ -155,12 +166,6 @@ body { background: var(--page); }
 .quote .review-rating { margin: 0; color: #8c5400; letter-spacing: .13em; }
 [data-theme="dark"] .quote .review-rating { color: #ffcf71; }
 .quote blockquote { flex: 1; text-align: start; color: var(--muted); }
-.quote blockquote::before {
-  content: "“";
-  margin-inline-end: .25em;
-  color: var(--accent);
-  font: bold 1.5em / 0 Georgia, serif;
-}
 .review-author { margin-top: auto; padding-top: 18px; }
 .review-author::before {
   content: "";
