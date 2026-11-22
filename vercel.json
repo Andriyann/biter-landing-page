@@ -6,6 +6,12 @@
   "outputDirectory": "site",
   "redirects": [
     {
+      "source": "/",
+      "has": [{ "type": "host", "value": "biter-landing-page.vercel.app" }],
+      "destination": "https://bitersolution.com/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "biter-landing-page.vercel.app" }],
       "destination": "https://bitersolution.com/:path*",
