@@ -179,11 +179,6 @@ for (const video of serviceVideos) {
 }
 motionPreference.addEventListener('change', () => { if (motionPreference.matches) stopServiceVideo(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopServiceVideo(); });
-const reviewCardObserver = new IntersectionObserver(entries => {
-  for (const entry of entries) {
-    entry.target.classList.toggle('in-view', entry.intersectionRatio >= .6);
-  }
-}, { root: reviewTrack, threshold: .6 });
 let carouselVisible = false;
 let reviewTimer;
 
@@ -198,7 +193,7 @@ function scheduleReviewAdvance() {
   if (motionPreference.matches || !carouselVisible || document.hidden || carousel.matches(':hover, :focus-within')) return;
   if (previousReview.disabled && nextReview.disabled) return;
   reviewTimer = window.setTimeout(() => {
-    if (nextReview.disabled) reviewTrack.scrollTo({ left: 0, behavior: 'instant' });
+    if (nextReview.disabled) scrollToReview(0);
     else moveReviews(1);
     scheduleReviewAdvance();
   }, 9000);
@@ -207,7 +202,6 @@ function scheduleReviewAdvance() {
 motionPreference.addEventListener('change', scheduleReviewAdvance);
 const reviewObserver = new IntersectionObserver(([entry]) => {
   carouselVisible = entry.isIntersecting;
-  carousel.classList.toggle('in-view', carouselVisible);
   scheduleReviewAdvance();
 });
 reviewObserver.observe(carousel);
@@ -216,21 +210,27 @@ for (const event of ['pointerenter', 'pointerleave', 'focusin', 'focusout']) {
 }
 document.addEventListener('visibilitychange', scheduleReviewAdvance);
 
+function scrollToReview(index) {
+  const card = reviewTrack.children[index];
+  if (!card) return;
+  reviewTrack.scrollTo({
+    left: card.offsetLeft - reviewTrack.firstElementChild.offsetLeft,
+    behavior: motionPreference.matches ? 'instant' : 'smooth',
+  });
+}
+
 function moveReviews(direction) {
   const [first, second] = reviewTrack.children;
   if (!second) return;
-  const distance = second.offsetLeft - first.offsetLeft;
-  reviewTrack.scrollBy({ left: direction * distance, behavior: motionPreference.matches ? 'instant' : 'smooth' });
+  const spacing = second.offsetLeft - first.offsetLeft;
+  const current = Math.round(reviewTrack.scrollLeft / spacing);
+  const target = Math.max(0, Math.min(current + direction, reviewTrack.children.length - 1));
+  scrollToReview(target);
 }
 
 previousReview.addEventListener('click', () => moveReviews(-1));
 nextReview.addEventListener('click', () => moveReviews(1));
-let previousReviewScroll = 0;
-reviewTrack.addEventListener('scroll', () => {
-  reviewTrack.style.setProperty('--turn-angle', reviewTrack.scrollLeft >= previousReviewScroll ? '-13deg' : '13deg');
-  previousReviewScroll = reviewTrack.scrollLeft;
-  updateReviewControls();
-}, { passive: true });
+reviewTrack.addEventListener('scroll', updateReviewControls, { passive: true });
 window.addEventListener('resize', () => {
   updateReviewControls();
   scheduleReviewAdvance();
@@ -310,9 +310,7 @@ function showReviews(place) {
   });
 
   const previousOffset = reviewTrack.scrollLeft;
-  reviewCardObserver.disconnect();
   reviewTrack.replaceChildren(...cards);
-  cards.forEach(card => reviewCardObserver.observe(card));
   carousel.hidden = !cards.length;
   reviewTrack.scrollLeft = previousOffset;
   updateReviewControls();

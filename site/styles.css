@@ -124,16 +124,6 @@ body { background: var(--page); }
   padding-bottom: 38px;
 }
 .review-grid::-webkit-scrollbar { display: none; }
-@media (prefers-reduced-motion: no-preference) {
-  .review-carousel.in-view .quote.in-view { animation: review-turn .65s cubic-bezier(.2,.8,.22,1); }
-  .review-carousel.in-view .quote.in-view .review-author { animation: author-arrive .7s ease-out; }
-  @keyframes review-turn {
-    from { opacity: .42; transform: perspective(950px) rotateY(var(--turn-angle, -13deg)) translateY(10px) scale(.96); }
-    75% { opacity: 1; }
-    to { opacity: 1; transform: none; }
-  }
-  @keyframes author-arrive { 0%, 20% { opacity: .25; } to { opacity: 1; } }
-}
 .distance-card { max-width: 420px; padding: 18px; margin-bottom: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); }
 .distance-card h3 { margin: 0; }
 .distance-art { display: block; width: min(100%, 280px); margin: 8px auto; color: var(--accent); }
@@ -995,4 +985,64 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
   @media (max-width: 900px) {
     #layanan:is(:hover, :focus-within) .wrap { background-position: right 16px top 0; }
   }
+}
+
+/* Repair estimate workbench */
+.estimate-intro { max-width: 60ch; }
+.estimate-panel {
+  display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  margin-top: 28px; overflow: hidden; border: 1px solid var(--line);
+  border-radius: 22px; background: var(--surface);
+}
+.estimate-stage {
+  display: grid; place-items: center; position: relative; overflow: hidden;
+  isolation: isolate; min-height: 230px; color: #baf9ef;
+  background-color: #123545;
+  background-image: linear-gradient(#85cef011 1px, transparent 1px), linear-gradient(90deg,#85cef011 1px, transparent 1px), radial-gradient(ellipse at 45% 45%, #206275, #102c41 78%);
+  background-size: 22px 22px, 22px 22px, cover;
+}
+.estimate-stage::before {
+  content: ''; width: 68%; aspect-ratio: 1; border: 1px dashed #9cebe74d; border-radius: 50%;
+  position: absolute; z-index: -1;
+}
+.estimate-chip, .estimate-tool { position: absolute; width: min(37%, 160px); pointer-events: none; }
+.estimate-chip { left: -3%; top: 6%; transform: rotate(-12deg); }
+.estimate-tool { right: -2%; bottom: 2%; transform: rotate(6deg); }
+.estimate-drawing { width: min(65%, 245px); height: 220px; display: grid; align-content: center; justify-items: center; }
+.estimate-hardware {
+  width: 102px; height: 177px; padding: 9px; border: 3px solid #bfdfe7;
+  border-radius: 19px; background: #1e4051; box-shadow: 6px 7px #081e2e, 12px 22px 30px #00172480;
+  transform: rotate(-9deg) skewY(2deg);
+}
+.estimate-glass { display: grid; place-items: center; height: 100%; border: 1px solid #76c7cd; border-radius: inherit; background: linear-gradient(145deg,#255d72,#112c43); }
+.estimate-glass svg { width: 65px; max-width: 80%; }
+.estimate-stage[data-device="Laptop"] .estimate-hardware { width: 86%; height: 115px; border-radius: 9px; transform: skewY(-4deg); }
+.estimate-stage[data-device="Laptop"] .estimate-base {
+  width: 100%; height: 20px; border-radius: 2px 3px 12px 10px; background: #8db9c2;
+  transform: skew(-30deg,-4deg); box-shadow: 4px 5px #143042;
+}
+.estimate-controls { min-width: 0; padding: clamp(18px, 4vw, 42px); }
+.estimate-controls label, .estimate-devices legend { font-weight: 650; color: var(--ink); }
+.estimate-controls :is(input, select) { color: var(--ink); background: var(--surface); border-color: var(--line); }
+.estimate-devices { border: 0; padding: 0; margin: 0 0 16px; }
+.estimate-devices legend { font-size: .9rem; margin-bottom: 6px; }
+.estimate-devices label { display: inline-block; margin: 0; position: relative; }
+.estimate-devices input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.estimate-devices span {
+  display: inline-block; min-width: 88px; padding: 9px 16px; text-align: center; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 9px;
+}
+.estimate-devices input:checked + span { background: var(--action-fill); color: var(--action-ink); border-color: var(--action-edge); }
+.estimate-devices input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.estimate-receipt { margin: 20px 0; padding: 18px 0; border-block: 1px dashed var(--action-edge); }
+.estimate-receipt span { color: var(--muted); font-size: .9rem; }
+.estimate-receipt strong { display: block; color: var(--action-ink); font-size: clamp(1.25rem, 2.4vw, 2rem); line-height: 1.25; font-variant-numeric: tabular-nums; }
+.estimate-receipt .estimate-prompt { font-size: 1.15rem; }
+.estimate-receipt a { text-decoration: underline; text-underline-offset: 3px; }
+.estimate-receipt p { margin: 8px 0 0; font-size: .9rem; }
+.estimate-controls button:disabled { opacity: .55; cursor: default; }
+@media (max-width: 720px) {
+  .estimate-panel { grid-template-columns: minmax(0, 1fr); }
+  .estimate-stage { min-height: 160px; }
+  .estimate-drawing { height: 165px; scale: .75; }
 }

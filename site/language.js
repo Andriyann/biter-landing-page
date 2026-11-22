@@ -1,6 +1,21 @@
 'use strict';
 
 const englishCopy = {
+  "Cek kisaran biaya servis": "Check repair costs",
+  "Pilih model perangkat dan servis yang kamu perlukan. Bandingkan harga referensinya sebelum bertanya ke teknisi BITER.": "Select your model and repair to see reference prices before asking a BITER technician.",
+  "Model perangkat": "Device model",
+  "Pilih model perangkat": "Choose a device model",
+  "Model lainnya": "Other model",
+  "Jenis servis": "Repair type",
+  "Kendala lainnya": "Other issue",
+  "Teknisi BITER akan mengonfirmasi biaya berdasarkan kondisi perangkat dan pilihan komponen.": "BITER will confirm the cost based on the condition of your device and the parts you choose.",
+  "Tanyakan biaya ke BITER": "Ask BITER for a quote",
+  "Harga pembanding": "Reference price",
+  "Minta estimasi dari teknisi": "Ask a technician for a quote",
+  "Pilih model untuk melihat kisaran": "Choose a model to see prices",
+  "Isi merek dan tipe perangkatmu.": "Enter the brand and model of your device.",
+  "Mohon estimasi biaya untuk": "Please quote me for",
+
   "Dari pengecekan sampai perangkat siap diambil.": "From the first check to pickup.",
   "Seberapa dekat BITER dengan kamu?": "How far are you from BITER?",
   "Lokasi kamu": "Your location",
