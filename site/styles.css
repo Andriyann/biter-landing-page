@@ -612,29 +612,12 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--cyan); outl
   .cards { grid-template-columns: repeat(auto-fit, minmax(min(100%, 255px), 1fr)); }
 }
 
-/* The photograph is composed on the right so the headline has its own reading area. */
 .workshop-hero {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   background: #0b202d;
   color: #fff;
-}
-.workshop-backdrop {
-  position: absolute;
-  z-index: -2;
-  inset: 0 0 0 auto;
-  width: 66%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 48%;
-}
-.workshop-hero::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  background: linear-gradient(90deg, #0b202d 24%, #0b202df2 39%, #0b202d76 59%, transparent 80%);
 }
 .workshop-copy { padding-block: clamp(58px, 7vw, 112px); }
 .workshop-copy .eyebrow { color: #9cdef4; text-transform: uppercase; }
@@ -660,9 +643,6 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
   .cards article:hover, .cards article:focus-within { transform: translateY(-4px); box-shadow: 0 12px 28px #10233018; }
 }
 @media (max-width: 760px) {
-  .workshop-backdrop { width: 100%; height: 55%; inset: auto 0 0; }
-  .workshop-hero::before { background: linear-gradient(180deg, #0b202d 43%, #0b202dfa 50%, transparent 79%); }
-  .workshop-copy { padding-block: 42px clamp(175px, 42vw, 280px); }
   .workshop-copy .actions { flex-direction: row; align-items: center; gap: 12px; }
   .visit-inner { flex-wrap: wrap; gap: 12px 30px; }
   .visit-inner a { margin-left: 0; }
@@ -985,4 +965,58 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
   @media (max-width: 900px) {
     #layanan:is(:hover, :focus-within) .wrap { background-position: right 16px top 0; }
   }
+}
+
+.workshop-hero {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center; gap: clamp(24px, 5vw, 80px);
+  padding: clamp(32px, 5vw, 76px) max(24px, calc((100% - 1128px) / 2));
+  background: radial-gradient(ellipse at 76% 30%, #245364, transparent 68%), #0a202d;
+}
+.workshop-hero .workshop-copy { width: 100%; margin: 0; padding: 0; }
+.workshop-copy h1 { max-width: none; }
+.workshop-copy h1 em { font-size: .83em; }
+.workshop-gallery {
+  position: relative; isolation: isolate; overflow: hidden; aspect-ratio: 5 / 4;
+  border: 1px solid #81b9c68c; border-radius: 36px 10px 36px 10px; background: #153748;
+  box-shadow: 8px 8px 0 #8cd8df1a;
+}
+.workshop-gallery img { width: 100%; height: 100%; object-fit: cover; object-position: center 45%; }
+.gallery-picker {
+  position: absolute; inset: auto 0 0; display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 28px 12px 12px; background: linear-gradient(transparent, #081b29e8);
+}
+.gallery-picker button {
+  min-height: 44px; padding: 7px 12px; border: 1px solid #a7d4db; border-radius: 20px;
+  background: #112f3f; color: white; font-weight: 700; font-size: .88rem;
+}
+.gallery-picker button[aria-pressed="true"] { background: #b7eff1; color: #0b303c; }
+.gallery-picker button:focus-visible { outline: 3px solid white; outline-offset: 1px; }
+.repair-inquiry { display: inline-block; margin-top: 12px; color: var(--action-ink); }
+.repair-catalog li:focus-within svg, .repair-catalog li:hover svg { background: var(--action-fill); }
+.contact label:focus-within { color: #a8f0fa; }
+.contact :is(input,select,textarea):focus-visible { outline: 2px solid #9be6f6; outline-offset: 2px; }
+@media (max-width: 760px) {
+  .workshop-hero { grid-template-columns: minmax(0, 1fr); padding: 34px 20px 26px; }
+  .workshop-gallery { aspect-ratio: 16 / 10; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes section-enter { from { opacity: .65; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+  .section-enter { animation: section-enter .48s cubic-bezier(.2,.8,.2,1); }
+  .repair-catalog svg, .footer-socials .social-icon, .button, .visit-inner a { transition: translate .2s, background-color .2s; }
+  .repair-catalog li:is(:focus-within,:hover) svg, .footer-socials a:is(:focus-visible,:hover) .social-icon,
+  .button:is(:focus-visible,:hover), .visit-inner a:is(:focus-visible,:hover) { translate: 0 -3px; }
+  .button:active { translate: 0 1px; }
+  .faq details[open] p, .store-hours[open] table { animation: section-enter .32s ease-out; }
+  @supports (animation-timeline: scroll()) {
+    header::after { content: ''; position: absolute; inset: auto 0 0; height: 3px; pointer-events: none;
+      background: linear-gradient(90deg, var(--accent), #55d5dc); transform-origin: left;
+      animation: reading-progress linear both; animation-timeline: scroll(root); }
+    @keyframes reading-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  }
+}
+#message-preview { margin: 8px 0 16px; padding: 10px 14px; border-inline-start: 3px solid #83d7e6; background: #ffffff0d; }
+#message-preview p { margin-bottom: 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: no-preference) {
+  #message-preview[open] p { animation: section-enter .3s ease-out; }
 }

@@ -1,6 +1,11 @@
 'use strict';
 
 const englishCopy = {
+  "Pratinjau pesan WhatsApp": "Preview WhatsApp message",
+  "Tanyakan layanan ini": "Ask about this repair",
+  "Teknisi BITER di meja servis": "A BITER technician at the workbench",
+  "Bengkel": "Workshop",
+  "Foto layanan": "Workshop photos",
   "Dari pengecekan sampai perangkat siap diambil.": "From the first check to pickup.",
   "Seberapa dekat BITER dengan kamu?": "How far are you from BITER?",
   "Lokasi kamu": "Your location",
@@ -67,7 +72,7 @@ const englishCopy = {
   "Reball CPU": "CPU reballing",
   "Jika hasil pemeriksaan mengarah ke sambungan solder di bawah CPU, teknisi akan menjelaskan opsi reball serta risikonya.": "If testing points to solder joints beneath the CPU, the technician will explain the reballing option and its risks.",
   "Nomor WhatsApp BITER belum tersedia. Silakan kunjungi halaman ini kembali setelah informasi kontak diperbarui.": "The shop's WhatsApp number is currently unavailable. Please check back later.",
-  "BITER Services Solution • Laptop & HP": "BITER Services Solution • Laptop & Phone Repair",
+  "BITER Services Solution | Servis HP dan Laptop di Cileungsi, Bogor": "BITER Services Solution | Phone and Laptop Repair in Cileungsi, Bogor",
   "Lewati ke konten": "Skip to content",
   "Belajar": "Learn",
   "Layanan": "Services",
@@ -282,7 +287,7 @@ const englishCopy = {
   "Ulasan tidak dapat dimuat. Lihat langsung di Google Maps.": "Reviews could not be loaded. View them on Google Maps.",
   "Pengguna Google Maps": "Google Maps user",
   "Halo BITER, saya ingin konsultasi servis perangkat.": "Hi BITER, I'd like to ask about a device repair.",
-  "Kenali BITER Services Solution, usaha perbaikan laptop dan HP. Ceritakan kendala perangkat dan konsultasikan kebutuhan servis melalui WhatsApp.": "Explore BITER’s phone and laptop repair services and interactive device guides. Chat with us on WhatsApp."
+  "Servis HP dan laptop di BITER Services Solution, Setu Sari, Cileungsi, Kabupaten Bogor. Lihat layanan, jam buka, petunjuk arah, dan konsultasikan kendala via WhatsApp.": "Phone and laptop repairs at BITER Services Solution in Cileungsi, Bogor. Find services, opening hours, directions and WhatsApp consultations."
 };
 
 function translate(text) {

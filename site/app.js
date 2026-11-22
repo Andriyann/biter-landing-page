@@ -383,19 +383,31 @@ showReviews();
 if (config.googleMapsApiKey?.trim()) void startReviews();
 
 document.querySelectorAll('.service').forEach(button => button.addEventListener('click', () => {
-  $('device').value=button.dataset.device; location.hash='konsultasi'; $('device').focus({preventScroll:true});
+  $('device').value=button.dataset.device; updateMessagePreview(); location.hash='konsultasi'; $('device').focus({preventScroll:true});
 }));
+function consultationMessage() {
+  const data = new FormData($('consult'));
+  const message=`Halo BITER Services Solution, saya ${String(data.get('name')).trim()}.\nPerangkat: ${data.get('device')}\nMerek/model: ${String(data.get('model')).trim() || '-'}\nKendala/pertanyaan: ${String(data.get('issue')).trim()}\nMohon informasi langkah berikutnya. Terima kasih.`;
+  return document.documentElement.lang === 'en'
+    ? `Hi BITER, my name is ${String(data.get('name')).trim()}.\nDevice: ${translate(data.get('device'))}\nBrand/model: ${String(data.get('model')).trim() || '-'}\nIssue: ${String(data.get('issue')).trim()}\nWhat would you recommend next? Thank you.`
+    : message;
+}
+
+const preview = $('message-preview');
+function updateMessagePreview() {
+  if (preview.open) preview.querySelector('p').textContent = consultationMessage();
+}
+preview.addEventListener('toggle', updateMessagePreview);
+$('consult').addEventListener('input', updateMessagePreview);
+document.addEventListener('biter-language', updateMessagePreview);
+preview.hidden = false;
+
 $('consult').addEventListener('submit', event => {
   event.preventDefault();
   if (!whatsappUrl) {
     $('notice').textContent = translate('Nomor WhatsApp BITER belum tersedia. Silakan kunjungi halaman ini kembali setelah informasi kontak diperbarui.'); return;
   }
-  const data=new FormData(event.currentTarget);
-  const message=`Halo BITER Services Solution, saya ${String(data.get('name')).trim()}.\nPerangkat: ${data.get('device')}\nMerek/model: ${String(data.get('model')).trim() || '-'}\nKendala/pertanyaan: ${String(data.get('issue')).trim()}\nMohon informasi langkah berikutnya. Terima kasih.`;
-  const outgoing = document.documentElement.lang === 'en'
-    ? `Hi BITER, my name is ${String(data.get('name')).trim()}.\nDevice: ${translate(data.get('device'))}\nBrand/model: ${String(data.get('model')).trim() || '-'}\nIssue: ${String(data.get('issue')).trim()}\nWhat would you recommend next? Thank you.`
-    : message;
-  window.location.assign(whatsappUrl+'?text='+encodeURIComponent(outgoing));
+  window.location.assign(whatsappUrl+'?text='+encodeURIComponent(consultationMessage()));
 });
 
 const partDialog = $('part-dialog');
@@ -623,3 +635,48 @@ if (repairTour) {
   motionPreference.addEventListener('change', syncTour);
   syncTour();
 }
+
+const gallery = document.querySelector('.gallery-picker');
+const workshopImage = $('workshop-image');
+const galleryButtons = [...gallery.querySelectorAll('button')];
+function selectWorkshopPhoto(button) {
+  for (const choice of galleryButtons) choice.setAttribute('aria-pressed', String(choice === button));
+  workshopImage.src = './' + button.dataset.photo;
+  workshopImage.alt = translate(button.dataset.alt);
+  if (!motionPreference.matches) {
+    workshopImage.getAnimations().forEach(animation => animation.cancel());
+    workshopImage.animate([{ opacity: .7, transform: 'scale(1.025)' }, { opacity: 1, transform: 'scale(1)' }],
+      { duration: 340, easing: 'ease-out' });
+  }
+}
+for (const button of galleryButtons) button.addEventListener('click', () => selectWorkshopPhoto(button));
+gallery.hidden = false;
+document.addEventListener('biter-language', () => {
+  workshopImage.alt = translate(gallery.querySelector('[aria-pressed="true"]').dataset.alt);
+});
+
+let lastRepairInquiry = '';
+for (const link of document.querySelectorAll('.repair-inquiry')) {
+  link.addEventListener('click', () => {
+    const issue = $('consult').elements.issue;
+    const repair = link.closest('li').querySelector('h3').textContent;
+    const notes = lastRepairInquiry && issue.value.startsWith(lastRepairInquiry)
+      ? issue.value.slice(lastRepairInquiry.length).trimStart() : issue.value;
+    const draft = notes ? repair + '\n' + notes : repair;
+    if (draft.length <= issue.maxLength) {
+      issue.value = draft;
+      lastRepairInquiry = repair;
+      updateMessagePreview();
+    }
+    $('device').focus({ preventScroll: true });
+  });
+}
+
+const entrances = new IntersectionObserver(entries => {
+  for (const entry of entries) {
+    if (!entry.isIntersecting) continue;
+    entry.target.classList.add('section-enter');
+    entrances.unobserve(entry.target);
+  }
+});
+for (const panel of document.querySelectorAll('.workshop-copy, .workshop-gallery, .visit-inner, .anatomy-intro, .anatomy-bench, .sectionhead, .cards article, .repair-menu > div, .repair-catalog li, .service-process h2, .reviews h2, .location > div, .contact > div, #consult, .faq-intro, .faq-questions, .footer-inner > div')) entrances.observe(panel);
