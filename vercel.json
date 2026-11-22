@@ -4,6 +4,14 @@
   "installCommand": "",
   "buildCommand": "",
   "outputDirectory": "site",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "biter-landing-page.vercel.app" }],
+      "destination": "https://bitersolution.com/:path*",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

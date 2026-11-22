@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://biter-landing-page.vercel.app/sitemap.xml
+Sitemap: https://bitersolution.com/sitemap.xml
