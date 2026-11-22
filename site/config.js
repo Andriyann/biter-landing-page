@@ -6,21 +6,6 @@
   placeId: 'ChIJuWX1q0OXaS4RyFhrcVN_GzQ',
   shopLocation: { latitude: -6.4319015, longitude: 107.0309584 },
   googleMapsApiKey: '', // API key browser dengan pembatasan situs dan API
-  // Harga pembanding per model persis, dicek 22 November 2026 (rupiah).
-  repairReferences: {
-    HP: [
-      { model: 'Samsung Galaxy A14 4G', screen: [226000, 258000],
-        sources: [['EKASERVICE', 'https://ekaservice.com/harga/samsung-galaxy-a14-4g/']] },
-      { model: 'iPhone 11', screen: [429000, 660000], battery: [219000, 359000],
-        sources: [['EKASERVICE', 'https://ekaservice.com/harga/iphone-11/']] },
-      { model: 'iPhone 12', screen: [540000, 915000], battery: [299000, 429000],
-        sources: [['EKASERVICE', 'https://ekaservice.com/harga/iphone-12/']] }
-    ],
-    Laptop: [
-      { model: 'MacBook Air M1 (A2337)', screen: [3899000, 5500000], battery: [699000, 1700000],
-        sources: [['EKASERVICE', 'https://ekaservice.com/harga/macbook-a2337/'], ['iCare', 'https://icarestore.id/service']] }
-    ]
-  },
   testimonials: [
     {
       name: 'Mega Putri Aulia',
