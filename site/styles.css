@@ -1020,3 +1020,25 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
 @media (prefers-reduced-motion: no-preference) {
   #message-preview[open] p { animation: section-enter .3s ease-out; }
 }
+
+.workshop-gallery img {
+  filter: saturate(.86) contrast(1.04);
+}
+.workshop-gallery img[src$="meja-kerja.jpg"] {
+  object-position: center 68%;
+  filter: brightness(1.12) saturate(.81);
+}
+.workshop-gallery img[src$="konsultasi-biter.jpg"] {
+  object-position: center 55%;
+  filter: brightness(1.16) saturate(.76);
+}
+.workshop-gallery::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #17647b;
+  opacity: .13;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+.gallery-picker { z-index: 1; }
