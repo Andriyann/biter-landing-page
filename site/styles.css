@@ -631,7 +631,8 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--cyan); outl
 .visit-inner div { display: grid; font-size: .96rem; }
 .visit-inner strong { color: var(--muted); font-size: .83rem; }
 .visit-inner a { margin-left: auto; }
-header { position: sticky; z-index: 8; top: 0; min-height: 70px; background: var(--page); }
+header { position: sticky; z-index: 8; top: 0; min-height: 70px; background: var(--page);
+  max-width: none; padding-inline: max(16px, calc((100% - 1368px) / 2), min(3vw, 36px)); }
 header .brand img { width: 108px; }
 header nav a[aria-current="location"]:not(.navcta) { background: var(--soft); box-shadow: inset 0 -2px var(--accent); }
 header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); }
@@ -707,7 +708,7 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
 .part-preview svg { width: 95px; height: 100px; }
 #part-example { padding-left: 14px; border-left: 3px solid var(--action-edge); }
 @media (max-width: 840px) {
-  .anatomy { grid-template-columns: 1fr; }
+  .anatomy { grid-template-columns: minmax(0, 1fr); }
   .anatomy-intro p:last-child { max-width: 52ch; margin-bottom: 0; }
   .anatomy-bench { width: 100%; max-width: 550px; justify-self: center; }
 }
@@ -973,9 +974,12 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
   padding: clamp(32px, 5vw, 76px) max(24px, calc((100% - 1128px) / 2));
   background: radial-gradient(ellipse at 76% 30%, #245364, transparent 68%), #0a202d;
 }
-.workshop-hero .workshop-copy { width: 100%; margin: 0; padding: 0; }
+.workshop-hero .workshop-copy { width: 100%; margin: 0; padding: 0; container-type: inline-size; }
 .workshop-copy h1 { max-width: none; }
-.workshop-copy h1 em { font-size: .83em; }
+.workshop-copy h1 em {
+  display: inline-block; white-space: nowrap;
+  font-size: min(.83em, 11.5cqi); letter-spacing: -.045em;
+}
 .workshop-gallery {
   position: relative; isolation: isolate; overflow: hidden; aspect-ratio: 5 / 4;
   border: 1px solid #81b9c68c; border-radius: 36px 10px 36px 10px; background: #153748;
