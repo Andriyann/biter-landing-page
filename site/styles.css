@@ -698,14 +698,14 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
   background: var(--surface); color: var(--ink); box-shadow: 0 18px 80px #07172355;
 }
 #part-dialog::backdrop { background: #061822bb; }
-#part-dialog form { position: absolute; right: 30px; top: 30px; }
+#part-dialog form { position: absolute; z-index: 1; right: 30px; top: 30px; }
 #part-dialog form button {
   width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--action-fill);
   color: var(--action-ink); font-size: 26px; line-height: 1;
 }
 #part-dialog form button:is(:hover,:focus-visible,:active) { background: var(--action-hover); }
-.part-preview { height: 130px; display: grid; place-items: center; border-radius: 12px; }
-.part-preview svg { width: 95px; height: 100px; }
+.part-preview { height: clamp(150px, 25vh, 195px); display: grid; place-items: center; border-radius: 12px; }
+.part-preview svg { width: min(58%, 190px); height: 85%; }
 #part-example { padding-left: 14px; border-left: 3px solid var(--action-edge); }
 @media (max-width: 840px) {
   .anatomy { grid-template-columns: minmax(0, 1fr); }
@@ -1063,4 +1063,46 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
 }
 html[data-motion-paused] *, html[data-motion-paused] *::before, html[data-motion-paused] *::after {
   animation: none !important;
+}
+
+/* The grid and dialog share the same component drawings. Reveal the extra
+   illustration layers only in the enlarged preview. */
+.anatomy-part .detail-overlay { display: none; }
+.part-preview .hairline { stroke-width: .8; }
+@media (prefers-reduced-motion: no-preference) {
+  #part-dialog[open] .glass-fracture {
+    stroke-dasharray: 1; animation: glass-spread 4.5s ease-out infinite;
+  }
+  #part-dialog[open] .branch { animation-delay: .14s; }
+  #part-dialog[open] .hairline { animation-delay: .27s; }
+  @keyframes glass-spread {
+    0%, 7% { stroke-dashoffset: 1; opacity: 0; }
+    12% { opacity: 1; }
+    46%, 78% { stroke-dashoffset: 0; opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+  }
+  .part-preview .fan-blades { transform-origin: 50px 34px; animation: fan-spin 2.2s linear infinite; }
+  @keyframes fan-spin { to { transform: rotate(360deg); } }
+  .part-preview .camera-aperture { transform-box: fill-box; transform-origin: center; animation: lens-focus 2.8s ease-in-out infinite; }
+  @keyframes lens-focus { 50% { transform: scale(.5); } }
+  .part-preview .haptic-motor { animation: motor-buzz 1.4s linear infinite; }
+  @keyframes motor-buzz {
+    0%, 24%, 100% { transform: translateX(0); }
+    4%, 12%, 20% { transform: translateX(2px); }
+    8%, 16% { transform: translateX(-2px); }
+  }
+  .part-preview .charge-level { transform-box: fill-box; transform-origin: left; animation: battery-fill 3.2s ease-in-out infinite; }
+  @keyframes battery-fill { 0%, 100% { transform: scaleX(.1); } 66%, 88% { transform: scaleX(1); } }
+  .part-preview .plug-tip { animation: plug-in 3.3s ease-in-out infinite; }
+  @keyframes plug-in { 0%, 100% { transform: translateY(18px); } 42%, 74% { transform: translateY(0); } }
+  .part-preview :is(.bus-signal,.audio-input,.radio-waves,.sound-waves) {
+    stroke-dasharray: 1; animation: signal-travel 2.4s ease-out infinite;
+  }
+  @keyframes signal-travel { 0% { stroke-dashoffset: 1; opacity: .25; } 60%, 80% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: .25; } }
+  .part-preview .board-traces path { stroke-dasharray: 7 4; animation: circuit-flow 1.4s linear infinite; }
+  @keyframes circuit-flow { to { stroke-dashoffset: -22; } }
+  .part-preview :is(.key-press,.memory-cell) { animation: component-active 2.6s ease-in-out infinite; }
+  .part-preview :is(.key-press,.memory-cell):nth-of-type(2n) { animation-delay: -.7s; }
+  .part-preview :is(.key-press,.memory-cell):nth-of-type(3n) { animation-delay: -1.4s; }
+  @keyframes component-active { 30%, 50% { fill: #83eadc; } }
 }
