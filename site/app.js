@@ -141,44 +141,73 @@ const carousel = $('review-carousel');
 const previousReview = $('review-prev');
 const nextReview = $('review-next');
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-const serviceVideos = [...document.querySelectorAll('#layanan .service-photo')];
-const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-let activeServiceVideo = null;
-
-function stopServiceVideo() {
-  if (!activeServiceVideo) return;
-  activeServiceVideo.pause();
-  activeServiceVideo.load(); // Restore the poster when the visitor moves on.
-  activeServiceVideo = null;
+const autoplayToggle = $('autoplay-toggle');
+let autoplayPaused = false;
+try { autoplayPaused = localStorage.getItem('biter-autoplay') === 'paused'; } catch {}
+function canAutoplay() {
+  return !autoplayPaused && !motionPreference.matches && !document.hidden;
 }
-function previewService(video) {
-  if (motionPreference.matches || document.hidden || activeServiceVideo === video) return;
-  stopServiceVideo();
+function refreshAutoplay() {
+  document.documentElement.toggleAttribute('data-motion-paused', !canAutoplay());
+  autoplayToggle.hidden = motionPreference.matches;
+  autoplayToggle.textContent = translate(autoplayPaused ? 'Lanjutkan animasi' : 'Jeda animasi');
+  document.dispatchEvent(new Event('biter-autoplay'));
+}
+autoplayToggle.addEventListener('click', () => {
+  autoplayPaused = !autoplayPaused;
+  try { localStorage.setItem('biter-autoplay', autoplayPaused ? 'paused' : 'playing'); } catch {}
+  refreshAutoplay();
+});
+motionPreference.addEventListener('change', refreshAutoplay);
+document.addEventListener('visibilitychange', refreshAutoplay);
+document.addEventListener('biter-language', refreshAutoplay);
+refreshAutoplay();
+
+function watchPlayback(element, update) {
+  let visible = false;
+  const sync = () => update(visible && canAutoplay());
+  new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    sync();
+  }).observe(element);
+  document.addEventListener('biter-autoplay', sync);
+}
+
+const serviceVideos = [...document.querySelectorAll('#layanan .service-photo')];
+const visibleVideos = new Set();
+let activeServiceVideo = null;
+function playService(video) {
+  if (activeServiceVideo === video) return;
+  activeServiceVideo?.pause();
   activeServiceVideo = video;
-  video.play().catch(() => {
-    if (activeServiceVideo === video && video.paused) stopServiceVideo();
-  });
+  if (video) video.play().catch(() => {});
+}
+function syncServices() {
+  const available = serviceVideos.filter(video => visibleVideos.has(video) && !video.error);
+  if (!canAutoplay() || !available.length) playService(null);
+  else if (!available.includes(activeServiceVideo)) playService(available[0]);
 }
 const serviceObserver = new IntersectionObserver(entries => {
-  if (hoverPointer.matches) return;
   for (const entry of entries) {
-    if (!entry.isIntersecting && entry.target === activeServiceVideo) stopServiceVideo();
+    if (entry.isIntersecting) visibleVideos.add(entry.target);
+    else visibleVideos.delete(entry.target);
   }
-  const entering = entries.find(entry => entry.isIntersecting);
-  if (entering) previewService(entering.target);
-}, { rootMargin: '-42% 0px -42% 0px' });
+  syncServices();
+}, { rootMargin: '-10% 0px' });
 for (const video of serviceVideos) {
-  const card = video.closest('article');
   serviceObserver.observe(video);
-  card.addEventListener('pointerenter', () => { if (hoverPointer.matches) previewService(video); });
-  card.addEventListener('pointerleave', () => {
-    if (hoverPointer.matches && activeServiceVideo === video && !card.matches(':focus-within')) stopServiceVideo();
+  video.addEventListener('ended', () => {
+    if (video !== activeServiceVideo) return;
+    const available = serviceVideos.filter(item => visibleVideos.has(item) && !item.error);
+    playService(null);
+    if (canAutoplay() && available.length) playService(available[(available.indexOf(video) + 1) % available.length]);
   });
-  card.addEventListener('focusin', () => previewService(video));
-  card.addEventListener('focusout', () => { if (activeServiceVideo === video) stopServiceVideo(); });
+  video.addEventListener('error', syncServices);
+  const select = () => { if (canAutoplay() && visibleVideos.has(video)) playService(video); };
+  video.closest('article').addEventListener('pointerenter', select);
+  video.closest('article').addEventListener('focusin', select);
 }
-motionPreference.addEventListener('change', () => { if (motionPreference.matches) stopServiceVideo(); });
-document.addEventListener('visibilitychange', () => { if (document.hidden) stopServiceVideo(); });
+document.addEventListener('biter-autoplay', syncServices);
 let carouselVisible = false;
 let reviewTimer;
 
@@ -190,7 +219,7 @@ function updateReviewControls() {
 
 function scheduleReviewAdvance() {
   window.clearTimeout(reviewTimer);
-  if (motionPreference.matches || !carouselVisible || document.hidden || carousel.matches(':hover, :focus-within')) return;
+  if (!canAutoplay() || !carouselVisible || carousel.matches(':focus-within')) return;
   if (previousReview.disabled && nextReview.disabled) return;
   reviewTimer = window.setTimeout(() => {
     if (nextReview.disabled) scrollToReview(0);
@@ -199,16 +228,16 @@ function scheduleReviewAdvance() {
   }, 9000);
 }
 
-motionPreference.addEventListener('change', scheduleReviewAdvance);
+document.addEventListener('biter-autoplay', scheduleReviewAdvance);
 const reviewObserver = new IntersectionObserver(([entry]) => {
   carouselVisible = entry.isIntersecting;
   scheduleReviewAdvance();
 });
 reviewObserver.observe(carousel);
-for (const event of ['pointerenter', 'pointerleave', 'focusin', 'focusout']) {
+for (const event of ['focusin', 'focusout']) {
   carousel.addEventListener(event, () => window.requestAnimationFrame(scheduleReviewAdvance));
 }
-document.addEventListener('visibilitychange', scheduleReviewAdvance);
+
 
 function scrollToReview(index) {
   const card = reviewTrack.children[index];
@@ -480,8 +509,8 @@ const deviceLessons = {
       ['RAM', 'Data ditampung sementara selama proses unduh berlangsung.'],
       ['SSD', 'Sistem menulis berkas ke penyimpanan agar bisa dibuka lagi setelah laptop dimatikan.']
     ],
-    'Main gim': [
-      ['Baterai', 'Saat adaptor dilepas, baterai memasok daya untuk menjalankan gim.'],
+    'Main game': [
+      ['Baterai', 'Saat adaptor dilepas, baterai memasok daya untuk menjalankan game.'],
       ['Prosesor', 'CPU menghitung logika permainan, termasuk gerakan karakter dan respons terhadap tombol.'],
       ['Kipas', 'Jika suhu naik, kipas membantu membuang panas melalui sirip pendingin.']
     ]
@@ -505,23 +534,28 @@ for (const [id, lessons] of Object.entries(deviceLessons)) {
   const path = document.createElementNS(ns, 'polyline');
   overlay.append(path);
   model.append(overlay);
-  let selected = '';
+  const labels = Object.keys(lessons);
+  let selected = labels[0];
   let step = 0;
   let paused = false;
-  let finished = false;
+  let playingInView = false;
   let timer;
 
   function schedule() {
     clearTimeout(timer);
-    if (!selected || paused || finished || document.hidden || partDialog.open) return;
+    if (!playingInView || paused || partDialog.open) return;
     const delay = Math.max(3500, lessons[selected][step][1].length * 65);
-    timer = setTimeout(() => {
-      if (step + 1 === lessons[selected].length) finished = true;
-      else step++;
-      render();
-    }, delay);
+    timer = setTimeout(advance, delay);
   }
-  document.addEventListener('visibilitychange', schedule);
+  function advance() {
+    step++;
+    if (step === lessons[selected].length) {
+      selected = labels[(labels.indexOf(selected) + 1) % labels.length];
+      step = 0;
+    }
+    render();
+  }
+  watchPlayback(model.closest('.anatomy-bench'), running => { playingInView = running; render(); });
   model.addEventListener('click', schedule);
   partDialog.addEventListener('close', schedule);
 
@@ -550,29 +584,28 @@ for (const [id, lessons] of Object.entries(deviceLessons)) {
         segment.classList.toggle('reached', i <= step);
         return segment;
       }));
-      playback.textContent = translate(finished ? 'Putar ulang' : paused ? 'Teruskan' : 'Jeda');
+      reader.querySelector('.lab-title').textContent = translate(selected);
+      playback.textContent = translate(!canAutoplay() ? 'Langkah berikutnya' : paused ? 'Teruskan' : 'Jeda');
     }
     drawPath();
     schedule();
   }
 
-  for (const label of Object.keys(lessons)) {
+  for (const label of labels) {
     const button = document.createElement('button');
     button.type = 'button';
     button.dataset.lesson = label;
     button.addEventListener('click', () => {
       selected = label;
       step = 0;
-      paused = finished = false;
+      paused = false;
       render();
     });
     choices.append(button);
   }
   playback.addEventListener('click', () => {
-    if (finished) {
-      step = 0;
-      paused = finished = false;
-    } else paused = !paused;
+    if (!canAutoplay()) { advance(); return; }
+    paused = !paused;
     render();
   });
   document.addEventListener('biter-language', render);
@@ -605,7 +638,7 @@ if (repairTour) {
   }
   function syncTour() {
     clearTimeout(timer);
-    const running = visible && !document.hidden && !motionPreference.matches;
+    const running = visible && canAutoplay();
     cursor.hidden = !running;
     if (!running) return;
     target = Number(repairTour.dataset.stage) - 1;
@@ -630,9 +663,8 @@ if (repairTour) {
     syncTour();
   }, { threshold: .2 }).observe(repairTour);
   new ResizeObserver(positionCursor).observe(repairTour);
-  document.addEventListener('visibilitychange', syncTour);
+  document.addEventListener('biter-autoplay', syncTour);
   document.addEventListener('biter-language', syncTour);
-  motionPreference.addEventListener('change', syncTour);
   syncTour();
 }
 
@@ -649,7 +681,24 @@ function selectWorkshopPhoto(button) {
       { duration: 340, easing: 'ease-out' });
   }
 }
-for (const button of galleryButtons) button.addEventListener('click', () => selectWorkshopPhoto(button));
+let galleryTimer;
+let galleryPlaying = false;
+function scheduleGallery() {
+  clearTimeout(galleryTimer);
+  if (!galleryPlaying || gallery.contains(document.activeElement)) return;
+  galleryTimer = setTimeout(() => {
+    const index = galleryButtons.findIndex(button => button.getAttribute('aria-pressed') === 'true');
+    selectWorkshopPhoto(galleryButtons[(index + 1) % galleryButtons.length]);
+    scheduleGallery();
+  }, 5500);
+}
+watchPlayback(workshopImage, running => { galleryPlaying = running; scheduleGallery(); });
+gallery.addEventListener('focusin', scheduleGallery);
+gallery.addEventListener('focusout', () => requestAnimationFrame(scheduleGallery));
+for (const button of galleryButtons) button.addEventListener('click', () => {
+  selectWorkshopPhoto(button);
+  scheduleGallery();
+});
 gallery.hidden = false;
 document.addEventListener('biter-language', () => {
   workshopImage.alt = translate(gallery.querySelector('[aria-pressed="true"]').dataset.alt);
@@ -680,3 +729,7 @@ const entrances = new IntersectionObserver(entries => {
   }
 });
 for (const panel of document.querySelectorAll('.workshop-copy, .workshop-gallery, .visit-inner, .anatomy-intro, .anatomy-bench, .sectionhead, .cards article, .repair-menu > div, .repair-catalog li, .service-process h2, .reviews h2, .location > div, .contact > div, #consult, .faq-intro, .faq-questions, .footer-inner > div')) entrances.observe(panel);
+
+for (const visual of document.querySelectorAll('.repair-catalog, .distance-art, .faq-mascot, .contact, .footer-inner')) {
+  watchPlayback(visual, running => visual.classList.toggle('visual-playing', running));
+}

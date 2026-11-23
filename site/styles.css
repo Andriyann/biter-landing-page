@@ -1046,3 +1046,21 @@ header nav .navcta[aria-current="location"] { outline: 2px solid var(--accent); 
   pointer-events: none;
 }
 .gallery-picker { z-index: 1; }
+
+#autoplay-toggle { color: var(--action-ink); min-height: 44px; }
+.lab-title { display: block; margin-top: .75rem; color: #bdeaf5; }
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bench-lift { 0%, 70%, 100% { translate: 0 0; } 35% { translate: 0 -5px; } }
+  @keyframes route-dashes { to { stroke-dashoffset: -24; } }
+  .repair-catalog.visual-playing li svg, .faq-mascot.visual-playing .faq-bubble,
+  .contact.visual-playing > div:first-child::after, .footer-inner.visual-playing > div:first-child::after {
+    animation: bench-lift 4s ease-in-out infinite;
+  }
+  .repair-catalog li:nth-child(2) svg { animation-delay: .6s; }
+  .repair-catalog li:nth-child(3) svg { animation-delay: 1.2s; }
+  .repair-catalog li:nth-child(4) svg { animation-delay: 1.8s; }
+  .distance-art.visual-playing > path:first-child { animation: route-dashes 3s linear infinite; }
+}
+html[data-motion-paused] *, html[data-motion-paused] *::before, html[data-motion-paused] *::after {
+  animation: none !important;
+}
