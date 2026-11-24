@@ -439,9 +439,8 @@ $('consult').addEventListener('submit', event => {
     $('notice').textContent = translate('Nomor WhatsApp BITER belum tersedia. Silakan kunjungi halaman ini kembali setelah informasi kontak diperbarui.'); return;
   }
   const destination = whatsappUrl + '?text=' + encodeURIComponent(consultationMessage());
-  const openWhatsApp = () => window.location.assign(destination);
-  if (window.trackBiterWhatsApp) window.trackBiterWhatsApp('consultation_form', openWhatsApp);
-  else openWhatsApp();
+  window.trackBiterWhatsApp?.('consultation_form');
+  window.open(destination, '_blank', 'noopener,noreferrer');
 });
 
 const partDialog = $('part-dialog');
