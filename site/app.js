@@ -438,8 +438,10 @@ $('consult').addEventListener('submit', event => {
   if (!whatsappUrl) {
     $('notice').textContent = translate('Nomor WhatsApp BITER belum tersedia. Silakan kunjungi halaman ini kembali setelah informasi kontak diperbarui.'); return;
   }
-  window.trackBiterWhatsApp?.('consultation_form');
-  window.location.assign(whatsappUrl+'?text='+encodeURIComponent(consultationMessage()));
+  const destination = whatsappUrl + '?text=' + encodeURIComponent(consultationMessage());
+  const openWhatsApp = () => window.location.assign(destination);
+  if (window.trackBiterWhatsApp) window.trackBiterWhatsApp('consultation_form', openWhatsApp);
+  else openWhatsApp();
 });
 
 const partDialog = $('part-dialog');

@@ -13,8 +13,20 @@
     allow_ad_personalization_signals: false
   });
 
-  window.trackBiterWhatsApp = placement => {
-    gtag('event', 'whatsapp_click', { placement });
+  window.trackBiterWhatsApp = (placement, onComplete) => {
+    const eventParameters = { placement };
+    if (onComplete) {
+      const complete = () => {
+        if (timeout === undefined) return;
+        clearTimeout(timeout);
+        timeout = undefined;
+        onComplete();
+      };
+      let timeout = setTimeout(complete, 800);
+      eventParameters.event_callback = complete;
+      eventParameters.event_timeout = 700;
+    }
+    gtag('event', 'whatsapp_click', eventParameters);
   };
 
   const tag = document.createElement('script');
