@@ -1,6 +1,6 @@
 ﻿window.BITER_CONFIG = {
   whatsapp: '628889749796', // Nomor resmi dalam format 628xxxxxxxxxx
-  gaMeasurementId: 'G-180J8C2B6H', // Measurement ID stream produksi
+  gaMeasurementId: 'G-FEK00QJKPP', // Measurement ID stream produksi biter-tech
   address: 'Jl. Villa Surya Jaya No. 3, RT.03/RW.09, Setu Sari, Kec. Cileungsi, Kabupaten Bogor, Jawa Barat 16820',
   directionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=BITER+Services+Solution&destination_place_id=ChIJuWX1q0OXaS4RyFhrcVN_GzQ',
   reviewsUrl: 'https://search.google.com/local/reviews?placeid=ChIJuWX1q0OXaS4RyFhrcVN_GzQ',
