@@ -292,6 +292,10 @@ const englishCopy = {
   "Ulasan belum bisa diperbarui. Buka Google Maps untuk melihat ulasan terbaru.": "Reviews could not be refreshed. Open Google Maps for the latest reviews.",
   "Ulasan tidak dapat dimuat. Lihat langsung di Google Maps.": "Reviews could not be loaded. View them on Google Maps.",
   "Pengguna Google Maps": "Google Maps user",
+  "Privasi dan cookie": "Privacy and cookies",
+  "BITER menggunakan Google Analytics untuk mengukur kunjungan dan klik WhatsApp. Google Analytics menggunakan cookie dan memproses data seperti halaman yang dilihat, sumber kunjungan, serta informasi browser dan perangkat. Isi formulir konsultasi tidak dikirim ke Google Analytics.": "BITER uses Google Analytics to measure visits and WhatsApp clicks. Google Analytics uses cookies and processes data such as pages viewed, traffic sources, and browser and device information. Consultation form entries are not sent to Google Analytics.",
+  "Cara Google menggunakan data": "How Google uses data",
+  "Nonaktifkan Google Analytics di browser": "Opt out of Google Analytics in your browser",
   "Halo BITER, saya ingin konsultasi servis perangkat.": "Hi BITER, I'd like to ask about a device repair.",
   "Servis HP dan laptop di BITER Services Solution, Setu Sari, Cileungsi, Kabupaten Bogor. Lihat layanan, jam buka, petunjuk arah, dan konsultasikan kendala via WhatsApp.": "Phone and laptop repairs at BITER Services Solution in Cileungsi, Bogor. Find services, opening hours, directions and WhatsApp consultations."
 };

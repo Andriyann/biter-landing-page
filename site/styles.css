@@ -412,6 +412,10 @@ header nav .navcta { padding-inline: 17px; }
   color: #bdd1de;
   font-size: .8rem;
 }
+.footer-credit small { font-size: inherit; }
+.footer-privacy { margin-top: 8px; max-width: 68ch; }
+.footer-privacy summary { cursor: pointer; width: fit-content; }
+.footer-privacy a { color: inherit; text-decoration: underline; }
 
 @media (max-width: 760px) {
   .service-flow { grid-template-columns: 1fr; }

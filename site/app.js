@@ -125,8 +125,10 @@ if (whatsappUrl) {
   document.addEventListener('biter-language', updateLauncher);
   launcher.target = '_blank';
   launcher.rel = 'noopener noreferrer';
+  launcher.addEventListener('click', () => window.trackBiterWhatsApp?.('floating'));
   $('footer-whatsapp').href = whatsappUrl;
 }
+$('footer-whatsapp').addEventListener('click', () => window.trackBiterWhatsApp?.('footer'));
 
 for (const [id, url] of [['directions', config.directionsUrl], ['review-link', config.reviewsUrl]]) {
   const link = $(id);
@@ -436,6 +438,7 @@ $('consult').addEventListener('submit', event => {
   if (!whatsappUrl) {
     $('notice').textContent = translate('Nomor WhatsApp BITER belum tersedia. Silakan kunjungi halaman ini kembali setelah informasi kontak diperbarui.'); return;
   }
+  window.trackBiterWhatsApp?.('consultation_form');
   window.location.assign(whatsappUrl+'?text='+encodeURIComponent(consultationMessage()));
 });
 
